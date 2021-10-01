@@ -38,6 +38,7 @@ cloud(360, 90, 20)
 cloud(240, 110, 10)
 tree(260, 230, 5)
 tree(420, 180, 3)
+pg.draw.circle(screen, (255, 100, 150), (40, 40), 35) 
 
 pg.display.update()
 clock = pg.time.Clock()
