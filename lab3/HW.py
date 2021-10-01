@@ -12,7 +12,7 @@ def house(x, y, a):
     pg.draw.polygon(screen, (255, 0, 0), ((x, y), (x + 2*a, y), (x + a, y - 3*a/4)))
 
 def cloud(x, y ,a):
-    b = 0
+    b = 1
     for i in range(4):
         pg.draw.circle(screen, (255, 255, 255), (x + b, y), a)
         pg.draw.circle(screen, (0, 0, 0), (x + b, y), a, 1)
