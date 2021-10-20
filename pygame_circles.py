@@ -1,12 +1,16 @@
-import pygame
+import pygame as pg
+from pygame.draw import circle
 from random import randint
+import pygame.freetype
+import ctypes
+
 pygame.init()
 
-
-counter = 0  # Подсчёт количества очков
-points = 0  # Подсчёт количества фигур, появившихся на экране за всё время игры 
-FPS = 0.5  # Speed (level)
-screen = pygame.display.set_mode((1200, 900))
+FPS = 60
+user32 = ctypes.windll.user32
+width = user32.GetSystemMetrics(1)
+length = user32.GetSystemMetrics(0)
+screen = pg.display.set_mode((length, width - 80))
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -16,23 +20,71 @@ MAGENTA = (255, 0, 255)
 CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN, WHITE]
+COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN,  WHITE]
 
-def new_circle():
-    '''рисует новые круги '''
-    global x, x1, x2, x3, x4, y, y1, y2, y3, y4, r, r1, r2, r3, r4
+s = 0  # счетчик попаданий
+f = []  # массив всех шариков
+dt = 0
+pg.font.init()
+myfont = pg.freetype.SysFont('Courier New', 24)
+
+
+def Creating_balls(f):
+    """ Создаем шарик """
+    global x, y, r
     x = randint(100, 1100)
-    x1 = randint(100, 1100)
-    x2 = randint(100, 1100)
-    x3 = randint(100, 1100)
-    x4 = randint(100, 1100)
     y = randint(100, 800)
-    y1 = randint(100, 800)
-    y2 = randint(100, 800)
-    y3 = randint(100, 800)
-    y4 = randint(100, 800)
     r = randint(25, 40)
-    r1 = randint(25, 40)
+    speed_x = randint(5, 8) * (-1) ** randint(0, 1)
+    speed_y = randint(5, 8) * (-1) ** randint(0, 1)
+    color = COLORS[randint(0, 6)]
+    if dt % 45 == 0:
+        circle(screen, color, (x, y), r)
+        f = f.append([x, y, r, color, speed_x, speed_y])
+
+
+def Move_balls(f):
+    """ Сдвигаем шарики и изменяем счет """
+    for i in range(len(f)):
+        if f[i][0] < f[i][2] or f[i][0] > length - f[i][2]:
+            f[i][4] = -f[i][4]
+        if f[i][1] < f[i][2] or f[i][1] > width - f[i][2]:
+            f[i][5] = -f[i][5]
+        f[i][0] = f[i][0] + f[i][4]
+        f[i][1] = f[i][1] + f[i][5]
+        circle(screen, f[i][3], (f[i][0], f[i][1]), f[i][2])
+    myfont.render_to(screen, (50, 50), 'Score: ' + str(s), 'yellow')
+
+
+def Removing_and_Scoring(f, event, s):
+    """ убиваем шарик и увеличиваем счет """
+    for i in range(len(f)):
+        if (event.pos[0] - f[i][0]) ** 2 + (event.pos[1] - f[i][1]) ** 2 <= (f[i][2]) ** 2:
+            f[i] = [0, 0, 0, 0, 0, 0]
+            s += 1
+    return s
+
+
+clock = pg.time.Clock()
+finish = True
+
+while finish:
+    clock.tick(FPS)
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            finish = False
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            s = Removing_and_Scoring(f, event, s)
+
+    #  Здесь мы создаём шарик, передвигаем все шарики на экране и обновляем экран
+    Creating_balls(f)
+    dt += 1
+    Move_balls(f)
+    pg.display.update()
+    screen.fill(BLACK)
+
+pygame.quit()
+
     r2 = randint(25, 40)
     r3 = randint(25, 40)
     r4 = randint(25, 40)
